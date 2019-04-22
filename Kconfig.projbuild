@@ -1,0 +1,25 @@
+menu "Biovo FP1020A library configuration"
+
+    config FP1020A_TX_PIN
+        int "UART Tx Pin"
+        default 25
+
+    config FP1020A_RX_PIN
+        int "UART Rx Pin"
+        default 26
+
+    config FP1020A_WAKE_PIN
+        int "External wakeup interrupt pin"
+        default -1
+        help
+            Leave -1 if not being used
+
+    config FP1020A_BAUD_RATE
+        int "UART Baud rate"
+        default 19200
+
+    config FP1020A_BUFFER_SIZE
+        int "UART Read buffer size"
+        default 512
+
+endmenu
