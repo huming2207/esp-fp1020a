@@ -38,18 +38,18 @@ void fp1020a_init()
 
     uart_param_config(UART_NUM_1, &uart_config);
     uart_set_pin(UART_NUM_1, CONFIG_FP1020A_TX_PIN, CONFIG_FP1020A_RX_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
-    uart_driver_install(UART_NUM_1, CONFIG_FP1020A_BUFFER_SIZE, 0, 0, NULL, 0);
+    uart_driver_install(UART_NUM_1, 2048, 0, 0, NULL, 0);
 }
 
 void fp1020a_sleep()
 {
-    uint8_t sleep_cmd[] = { FP1020A_CMD_SLEEP, 0, 0, 0, 0 };
+    const uint8_t sleep_cmd[] = { FP1020A_CMD_SLEEP, 0, 0, 0, 0 };
     fp1020a_send_cmd(sleep_cmd);
 }
 
 fp_ack_t fp1020a_add_fp(const uint8_t stage, const uint16_t user_id, const fp_user_lvl_t user_lvl)
 {
-    uint8_t fp_cmd_data[] = {
+    const uint8_t fp_cmd_data[] = {
                 stage,
                 (user_id >> 8u),            // User ID's MSB
                 (user_id & 0xffU),          // User ID's LSB
@@ -59,9 +59,10 @@ fp_ack_t fp1020a_add_fp(const uint8_t stage, const uint16_t user_id, const fp_us
 
     fp1020a_send_cmd(fp_cmd_data);
 
-    uint8_t fp_add_result[5] = { 0 };
-    if(fp1020a_recv_ack(fp_add_result, 5) != ESP_OK) return FP1020A_ACK_UART_ERROR;
-    return fp_add_result[3]; // If nothing goes wrong, return the status byte.
+    uint8_t fp_ret[8] = { 0 };
+    if(fp1020a_recv_ack(fp_ret, 8) != ESP_OK) return FP1020A_ACK_UART_ERROR;
+    
+    return fp_ret[4]; // If nothing goes wrong, return the status byte.
 }
 
 fp_ack_t fp1020a_add_fp_start(const uint16_t user_id, const fp_user_lvl_t user_lvl)
@@ -81,7 +82,7 @@ fp_ack_t fp1020a_add_fp_end(const uint16_t user_id, const fp_user_lvl_t user_lvl
 
 fp_ack_t fp1020a_remove_one_user(const uint16_t user_id)
 {
-    uint8_t fp_cmd_data[] = {
+    const uint8_t fp_cmd_data[] = {
             FP1020A_CMD_DELETE_USER,
             (user_id >> 8u),            // User ID's MSB
             (user_id & 0xffU),          // User ID's LSB
@@ -91,38 +92,38 @@ fp_ack_t fp1020a_remove_one_user(const uint16_t user_id)
 
     fp1020a_send_cmd(fp_cmd_data);
 
-    uint8_t fp_add_result[5] = { 0 };
-    if(fp1020a_recv_ack(fp_add_result, 5) != ESP_OK) return FP1020A_ACK_UART_ERROR;
-    return fp_add_result[3]; // If nothing goes wrong, return the status byte.
+    uint8_t fp_ret[8] = { 0 };
+    if(fp1020a_recv_ack(fp_ret, 8) != ESP_OK) return FP1020A_ACK_UART_ERROR;
+    return fp_ret[4]; // If nothing goes wrong, return the status byte.
 }
 
 fp_ack_t fp1020a_remove_all_user()
 {
-    uint8_t fp_cmd_data[] = { FP1020A_CMD_DELETE_ALL, 0, 0, 0, 0 };
+    const uint8_t fp_cmd_data[] = { FP1020A_CMD_DELETE_ALL, 0, 0, 0, 0 };
 
     fp1020a_send_cmd(fp_cmd_data);
 
-    uint8_t fp_add_result[5] = { 0 };
-    if(fp1020a_recv_ack(fp_add_result, 5) != ESP_OK) return FP1020A_ACK_UART_ERROR;
-    return fp_add_result[3]; // If nothing goes wrong, return the status byte.
+    uint8_t fp_ret[8] = { 0 };
+    if(fp1020a_recv_ack(fp_ret, 8) != ESP_OK) return FP1020A_ACK_UART_ERROR;
+    return fp_ret[4]; // If nothing goes wrong, return the status byte.
 }
 
 int fp1020a_get_user_amount()
 {
-    uint8_t fp_cmd_data[] = { FP1020A_CMD_USER_AMOUNT, 0, 0, 0, 0 };
+    const uint8_t fp_cmd_data[] = { FP1020A_CMD_USER_AMOUNT, 0, 0, 0, 0 };
 
     fp1020a_send_cmd(fp_cmd_data);
 
-    uint8_t fp_add_result[5] = { 0 };
-    if(fp1020a_recv_ack(fp_add_result, 5) != ESP_OK) return FP1020A_ACK_UART_ERROR;
+    uint8_t fp_ret[8] = { 0 };
+    if(fp1020a_recv_ack(fp_ret, 8) != ESP_OK) return FP1020A_ACK_UART_ERROR;
 
-    uint16_t user_count = ((uint16_t)(fp_add_result[1] << 8u) | fp_add_result[2]);
+    uint16_t user_count = ((uint16_t)(fp_ret[2] << 8u) | fp_ret[3]);
     return user_count;
 }
 
-fp_ack_t fp1020a_comp_one_to_one(const uint16_t user_id)
+fp_ack_t fp1020a_auth_user_id(uint16_t user_id)
 {
-    uint8_t fp_cmd_data[] = {
+    const uint8_t fp_cmd_data[] = {
             FP1020A_CMD_COMP_USER_ID,
             (user_id >> 8u),            // User ID's MSB
             (user_id & 0xffU),          // User ID's LSB
@@ -132,28 +133,28 @@ fp_ack_t fp1020a_comp_one_to_one(const uint16_t user_id)
 
     fp1020a_send_cmd(fp_cmd_data);
 
-    uint8_t fp_add_result[5] = { 0 };
-    if(fp1020a_recv_ack(fp_add_result, 5) != ESP_OK) return FP1020A_ACK_UART_ERROR;
-    return fp_add_result[3]; // If nothing goes wrong, return the status byte.
+    uint8_t fp_ret[8] = { 0 };
+    if(fp1020a_recv_ack(fp_ret, 8) != ESP_OK) return FP1020A_ACK_UART_ERROR;
+    return fp_ret[4]; // If nothing goes wrong, return the status byte.
 }
 
 fp_auth_t *fp1020a_auth_user()
 {
-    uint8_t fp_cmd_data[] = { FP1020A_CMD_AUTH_USER, 0, 0, 0, 0 };
+    const uint8_t fp_cmd_data[] = { FP1020A_CMD_AUTH_USER, 0, 0, 0, 0 };
 
     fp1020a_send_cmd(fp_cmd_data);
 
-    uint8_t fp_add_result[5] = { 0 };
-    if(fp1020a_recv_ack(fp_add_result, 5) != ESP_OK) return NULL;
+    uint8_t fp_ret[8] = { 0 };
+    if(fp1020a_recv_ack(fp_ret, 8) != ESP_OK) return NULL;
 
     fp_auth_t *fp_auth = malloc(sizeof(fp_auth_t));
 
-    if(fp_add_result[3] == FP1020A_ACK_NOUSER || fp_add_result[3] == FP1020A_ACK_TIMEOUT) {
+    if(fp_ret[4] == FP1020A_ACK_NOUSER || fp_ret[4] == FP1020A_ACK_TIMEOUT) {
         fp_auth->level = FP1020A_USER_LEVEL_FAIL;
         fp_auth->user_id = 0;
     } else {
-        fp_auth->level = (fp_user_lvl_t)fp_add_result[3];
-        fp_auth->user_id = ((uint16_t)(fp_add_result[1] << 8u) | fp_add_result[2]);
+        fp_auth->level = (fp_user_lvl_t)fp_ret[4];
+        fp_auth->user_id = ((uint16_t)(fp_ret[2] << 8u) | fp_ret[3]);
     }
 
     return fp_auth;
@@ -161,7 +162,7 @@ fp_auth_t *fp1020a_auth_user()
 
 fp_user_lvl_t fp1020a_get_user_level(const uint16_t user_id)
 {
-    uint8_t fp_cmd_data[] = {
+    const uint8_t fp_cmd_data[] = {
             FP1020A_CMD_GET_USER_LVL,
             (user_id >> 8u),            // User ID's MSB
             (user_id & 0xffU),          // User ID's LSB
@@ -171,16 +172,16 @@ fp_user_lvl_t fp1020a_get_user_level(const uint16_t user_id)
 
     fp1020a_send_cmd(fp_cmd_data);
 
-    uint8_t fp_add_result[5] = { 0 };
-    if(fp1020a_recv_ack(fp_add_result, 5) != ESP_OK || fp_add_result[3] == FP1020A_ACK_NOUSER)
+    uint8_t fp_ret[8] = { 0 };
+    if(fp1020a_recv_ack(fp_ret, 8) != ESP_OK || fp_ret[3] == FP1020A_ACK_NOUSER)
         return FP1020A_USER_LEVEL_FAIL;
 
-    return (fp_user_lvl_t)fp_add_result[3];
+    return (fp_user_lvl_t)fp_ret[4];
 }
 
 fp_ack_t fp1020a_set_comp_level(uint8_t level)
 {
-    uint8_t fp_cmd_data[] = {
+    const uint8_t fp_cmd_data[] = {
             FP1020A_CMD_SET_COMP_LEVEL,
             0,
             level,      // Compare level
@@ -190,9 +191,9 @@ fp_ack_t fp1020a_set_comp_level(uint8_t level)
 
     fp1020a_send_cmd(fp_cmd_data);
 
-    uint8_t fp_add_result[5] = { 0 };
-    if(fp1020a_recv_ack(fp_add_result, 5) != ESP_OK) return FP1020A_ACK_UART_ERROR;
-    return (fp_ack_t)fp_add_result[3];
+    uint8_t fp_ret[8] = { 0 };
+    if(fp1020a_recv_ack(fp_ret, 8) != ESP_OK) return FP1020A_ACK_UART_ERROR;
+    return (fp_ack_t)fp_ret[4];
 }
 
 fp_baud_rate_t fp1020a_set_baud_rate(fp_baud_rate_t baud_rate)
@@ -207,25 +208,7 @@ fp_baud_rate_t fp1020a_set_baud_rate(fp_baud_rate_t baud_rate)
 
     fp1020a_send_cmd(fp_cmd_data);
 
-    uint8_t fp_add_result[5] = { 0 };
-    if(fp1020a_recv_ack(fp_add_result, 5) != ESP_OK) return FP1020A_BAUD_RATE_UNKNOWN;
-    return (fp_baud_rate_t)fp_add_result[3];
-}
-
-int fp1020a_get_next_avail_user_id(const uint16_t id_begin, const uint16_t id_end)
-{
-    uint8_t fp_cmd_data[] = {
-            FP1020A_CMD_GET_AVALIABLE_USER_ID,
-            (id_begin >> 8u),
-            (id_begin & 0xffU),
-            (id_end >> 8u),
-            (id_end & 0xffU)
-    };
-
-    fp1020a_send_cmd(fp_cmd_data);
-
-    uint8_t fp_add_result[5] = { 0 };
-    if(fp1020a_recv_ack(fp_add_result, 5) != ESP_OK) return -1;
-    if(fp_add_result[3] == FP1020A_ACK_NOUSER || fp_add_result[3] == FP1020A_ACK_FAIL) return -2;
-    return ((uint16_t)(fp_add_result[1] << 8u) | fp_add_result[2]);
+    uint8_t fp_ret[8] = { 0 };
+    if(fp1020a_recv_ack(fp_ret, 8) != ESP_OK) return FP1020A_BAUD_RATE_UNKNOWN;
+    return (fp_baud_rate_t)fp_ret[4];
 }

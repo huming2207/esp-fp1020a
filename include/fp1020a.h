@@ -140,7 +140,7 @@ int fp1020a_get_user_amount();
  * @param user_id User ID
  * @return Fingerprint sensor ACK
  */
-fp_ack_t fp1020a_comp_one_to_one(uint16_t user_id);
+fp_ack_t fp1020a_auth_user_id(uint16_t user_id);
 
 /**
  * Compare all the registered users with a a fingerprint that
@@ -169,11 +169,3 @@ fp_ack_t fp1020a_set_comp_level(uint8_t level);
  * @return Old baud rate, or fail message if fails
  */
 fp_baud_rate_t fp1020a_set_baud_rate(fp_baud_rate_t baud_rate);
-
-/**
- * Get next available user ID
- * @param id_begin Begin ID range
- * @param id_end End ID range
- * @return Next available user ID
- */
-int fp1020a_get_next_avail_user_id(uint16_t id_begin, uint16_t id_end);
