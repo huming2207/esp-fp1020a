@@ -11,30 +11,54 @@
 #include "freertos/task.h"
 #include "esp_system.h"
 #include "esp_spi_flash.h"
+#include "esp_log.h"
 
+#include "fp1020a.h"
+
+#define TAG "fp_demo"
 
 void app_main()
 {
     printf("Hello world!\n");
 
-    /* Print chip information */
-    esp_chip_info_t chip_info;
-    esp_chip_info(&chip_info);
-    printf("This is ESP32 chip with %d CPU cores, WiFi%s%s, ",
-            chip_info.cores,
-            (chip_info.features & CHIP_FEATURE_BT) ? "/BT" : "",
-            (chip_info.features & CHIP_FEATURE_BLE) ? "/BLE" : "");
+    ESP_LOGI(TAG, "Initialising FP1020A");
+    fp1020a_init();
 
-    printf("silicon revision %d, ", chip_info.revision);
+    int user_id = 1;
 
-    printf("%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
-            (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
+    ESP_LOGI(TAG, "Please press your finger, 1/6");
+    fp_ack_t ret = fp1020a_add_fp_start(user_id, FP1020A_USER_LEVEL_1);
+    ESP_LOGI(TAG, "Returned %d", ret);
 
-    for (int i = 10; i >= 0; i--) {
-        printf("Restarting in %d seconds...\n", i);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    ESP_LOGI(TAG, "Please press your finger, 2/6");
+    ret = fp1020a_add_fp_intermediate(user_id, FP1020A_USER_LEVEL_1);
+    ESP_LOGI(TAG, "Returned %d", ret);
+
+    ESP_LOGI(TAG, "Please press your finger, 3/6");
+    ret = fp1020a_add_fp_intermediate(user_id, FP1020A_USER_LEVEL_1);
+    ESP_LOGI(TAG, "Returned %d", ret);
+
+    ESP_LOGI(TAG, "Please press your finger, 4/6");
+    ret = fp1020a_add_fp_intermediate(user_id, FP1020A_USER_LEVEL_1);
+    ESP_LOGI(TAG, "Returned %d", ret);
+
+    ESP_LOGI(TAG, "Please press your finger, 5/6");
+    ret = fp1020a_add_fp_intermediate(user_id, FP1020A_USER_LEVEL_1);
+    ESP_LOGI(TAG, "Returned %d", ret);
+
+    ESP_LOGI(TAG, "Please press your finger, 6/6");
+    ret = fp1020a_add_fp_end(user_id, FP1020A_USER_LEVEL_1);
+    ESP_LOGI(TAG, "Returned %d", ret);
+
+    for(uint8_t idx = 0; idx < 10; idx++) {
+        ESP_LOGI(TAG, "Now try your finger, %u/10", idx);
+        fp_auth_t *auth = fp1020a_auth_user();
+        ESP_LOGI(TAG, "Returned user ID %u, level %d", auth->user_id, auth->level);
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
-    printf("Restarting now.\n");
-    fflush(stdout);
-    esp_restart();
+
+
+    ESP_LOGI(TAG, "Deleting all records");
+    ret = fp1020a_remove_all_user();
+    ESP_LOGI(TAG, "Returned %d", ret);
 }
