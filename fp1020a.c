@@ -38,7 +38,7 @@ void fp1020a_init()
 
     uart_param_config(UART_NUM_1, &uart_config);
     uart_set_pin(UART_NUM_1, CONFIG_FP1020A_TX_PIN, CONFIG_FP1020A_RX_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
-    uart_driver_install(UART_NUM_1, 2048, 0, 0, NULL, 0);
+    uart_driver_install(UART_NUM_1, CONFIG_FP1020A_BUFFER_SIZE, 0, 0, NULL, 0);
 }
 
 void fp1020a_sleep()

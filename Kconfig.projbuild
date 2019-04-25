@@ -20,6 +20,6 @@ menu "Biovo FP1020A library configuration"
 
     config FP1020A_BUFFER_SIZE
         int "UART Read buffer size"
-        default 512
+        default 256
 
 endmenu
