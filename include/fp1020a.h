@@ -12,6 +12,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define FP1020A_ACK_SUCCESS                 0x00        // Success
 #define FP1020A_ACK_FAIL                    0x01        // Fail
 #define FP1020A_ACK_FULL                    0x04        // Fingerprint data is full
@@ -169,3 +173,7 @@ fp_ack_t fp1020a_set_comp_level(uint8_t level);
  * @return Old baud rate, or fail message if fails
  */
 fp_baud_rate_t fp1020a_set_baud_rate(fp_baud_rate_t baud_rate);
+
+#ifdef __cplusplus
+}
+#endif
