@@ -83,6 +83,11 @@ typedef enum {
 void fp1020a_init();
 
 /**
+ * Turn off the module and remove UART resource
+ */
+void fp1020a_deinit();
+
+/**
  * Put FP1020A to sleep mode
  */
 void fp1020a_sleep();

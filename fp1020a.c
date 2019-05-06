@@ -47,6 +47,12 @@ void fp1020a_sleep()
     fp1020a_send_cmd(sleep_cmd);
 }
 
+void fp1020a_deinit()
+{
+    fp1020a_sleep();
+    uart_driver_delete(UART_NUM_1);
+}
+
 fp_ack_t fp1020a_add_fp(const uint8_t stage, const uint16_t user_id, const fp_user_lvl_t user_lvl)
 {
     const uint8_t fp_cmd_data[] = {
